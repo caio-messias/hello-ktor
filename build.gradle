@@ -1,6 +1,4 @@
 buildscript {
-
-
     repositories {
         jcenter()
     }
@@ -41,5 +39,5 @@ dependencies {
     runtime group: 'org.jetbrains.exposed', name: 'exposed-jdbc', version: "$exposed_version"
     compile group: 'org.jetbrains.exposed', name: 'exposed-dao', version: "$exposed_version"
     compile "com.zaxxer:HikariCP:$hikari_version"
-
+    implementation 'org.valiktor:valiktor-core:0.12.0'
 }
