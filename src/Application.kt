@@ -8,19 +8,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
 import io.ktor.jackson.jackson
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.EngineMain
 import io.ktor.server.netty.Netty
-import java.lang.RuntimeException
 
-fun main(args: Array<String>): Unit = EngineMain.main(args)
-
-@Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun main() {
     embeddedServer(Netty, 8080) {
         install(ContentNegotiation) {
             jackson {
@@ -29,12 +23,22 @@ fun Application.module(testing: Boolean = false) {
         }
 
         DatabaseFactory.init()
-        val userRepository = UserRepositorySQL()
-        val userService = UserService(userRepository)
+        module()
 
-        routing {
-            userRoutes(userService)
-        }
     }.start(wait = true)
 }
 
+@Suppress("unused") // Referenced in application.conf
+@kotlin.jvm.JvmOverloads
+fun Application.module(testing: Boolean = false) {
+    val userRepository = UserRepositorySQL()
+    val userService = UserService(userRepository)
+
+    moduleWithDep(userService)
+}
+
+fun Application.moduleWithDep(userService: UserService) {
+    routing {
+        userRoutes(userService)
+    }
+}

@@ -20,7 +20,7 @@ import org.valiktor.i18n.mapToMessage
 fun Route.userRoutes(userService: UserService) {
     install(StatusPages) {
         exception<RuntimeException> { e ->
-            call.respond(HttpStatusCode.BadRequest, e.message ?: "")
+            call.respond(HttpStatusCode.InternalServerError, e.message ?: "")
         }
     }
 
@@ -30,24 +30,20 @@ fun Route.userRoutes(userService: UserService) {
             val id = call.parameters["id"]?.toLong() ?: 0
             val user = userService.getById(id)
 
-            if (user != null) {
+            user?.let {
                 call.respond(user)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            } ?: call.respond(HttpStatusCode.Conflict)
         }
 
         // $ curl -i -X POST -H "Content-Type: application/json" -d '{"name":"aaa","is_enabled":"true"}' "localhost:8080/users"
         post("") {
             try {
-                val userDao = call.receive<NewUserDao>()
-                val user = userService.createUser(userDao)
+                val newUser = call.receive<NewUserDao>()
+                val user = userService.createUser(newUser)
 
-                if (user != null) {
-                    call.respond(HttpStatusCode.Created)
-                } else {
-                    call.respond(HttpStatusCode.Conflict)
-                }
+                user?.let {
+                    call.respond(HttpStatusCode.Created, user)
+                } ?: call.respond(HttpStatusCode.Conflict)
             } catch (e: ValueInstantiationException) {
                 val cause = e.cause
                 if (cause is ConstraintViolationException) {
