@@ -5,10 +5,9 @@ import com.caiomessias.errors.InputValidationError
 import com.caiomessias.services.UserService
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException
 import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
+import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
@@ -18,12 +17,6 @@ import org.valiktor.ConstraintViolationException
 import org.valiktor.i18n.mapToMessage
 
 fun Route.userRoutes(userService: UserService) {
-    install(StatusPages) {
-        exception<RuntimeException> { e ->
-            call.respond(HttpStatusCode.InternalServerError, e.message ?: "")
-        }
-    }
-
     route("/users") {
         // $ curl -i "localhost:8080/users/1"
         get("/{id}") {
@@ -32,7 +25,7 @@ fun Route.userRoutes(userService: UserService) {
 
             user?.let {
                 call.respond(user)
-            } ?: call.respond(HttpStatusCode.Conflict)
+            } ?: call.respond(HttpStatusCode.NotFound)
         }
 
         // $ curl -i -X POST -H "Content-Type: application/json" -d '{"name":"aaa","is_enabled":"true"}' "localhost:8080/users"
@@ -42,6 +35,7 @@ fun Route.userRoutes(userService: UserService) {
                 val user = userService.createUser(newUser)
 
                 user?.let {
+                    call.response.header("Location", "/users/${user.id}")
                     call.respond(HttpStatusCode.Created, user)
                 } ?: call.respond(HttpStatusCode.Conflict)
             } catch (e: ValueInstantiationException) {

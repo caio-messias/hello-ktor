@@ -11,33 +11,29 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.EngineMain
 import io.ktor.server.netty.Netty
 
 fun main() {
-    embeddedServer(Netty, 8080) {
-        install(ContentNegotiation) {
-            jackson {
-                propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
-            }
-        }
-
+    embeddedServer(Netty, port = 8800) {
         DatabaseFactory.init()
-        module()
-
+        userRoutesImpl()
     }.start(wait = true)
 }
 
-@Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun Application.userRoutesImpl() {
     val userRepository = UserRepositorySQL()
     val userService = UserService(userRepository)
 
-    moduleWithDep(userService)
+    userRoutesComponent(userService)
 }
 
-fun Application.moduleWithDep(userService: UserService) {
+fun Application.userRoutesComponent(userService: UserService) {
+    install(ContentNegotiation) {
+        jackson {
+            propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+        }
+    }
+
     routing {
         userRoutes(userService)
     }

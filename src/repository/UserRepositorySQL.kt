@@ -18,14 +18,12 @@ class UserRepositorySQL : UserRepository {
     }
 
     override suspend fun createUser(newUserDao: NewUserDao): UserDao? {
-        var key = 0L
-        DatabaseFactory.dbQuery {
-            key = (UserModel.insert {
-                it[name] = newUserDao.name
-                it[isEnabled] = newUserDao.isEnabled
-            } get UserModel.id)
+        return DatabaseFactory.dbQuery {
+            UserModel.insert { user ->
+                user[name] = newUserDao.name
+                user[isEnabled] = newUserDao.isEnabled
+            }.resultedValues?.get(0)?.let { toUserDao(it) }
         }
-        return getById(key)
     }
 
     private fun toUserDao(row: ResultRow): UserDao {

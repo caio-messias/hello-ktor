@@ -32,14 +32,14 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "io.ktor:ktor-server-netty:$ktor_version"
     implementation "ch.qos.logback:logback-classic:$logback_version"
-    compile group: 'io.ktor', name: 'ktor-server-test-host', version: '1.3.1'
+    compile group: "io.ktor", name: "ktor-server-test-host", version: "$ktor_test_version"
     implementation "io.ktor:ktor-jackson:$ktor_version"
     implementation "com.h2database:h2:$h2_version"
     compile group: 'org.jetbrains.exposed', name: 'exposed-core', version: "$exposed_version"
     runtime group: 'org.jetbrains.exposed', name: 'exposed-jdbc', version: "$exposed_version"
     compile group: 'org.jetbrains.exposed', name: 'exposed-dao', version: "$exposed_version"
     compile "com.zaxxer:HikariCP:$hikari_version"
-    implementation 'org.valiktor:valiktor-core:0.12.0'
+    implementation "org.valiktor:valiktor-core:$valiktor_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:x.x"
 }
